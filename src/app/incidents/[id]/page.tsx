@@ -1,8 +1,6 @@
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { eq } from "drizzle-orm";
-import { db } from "@/db";
-import { incidents } from "@/db/schema";
 import { getIncidentWithWorkflows } from "@/lib/queries";
 import { PLAYBOOKS } from "@/lib/playbooks";
 import {
@@ -24,101 +22,160 @@ export default async function IncidentPage({
 }) {
   const { id } = await params;
   const incidentId = parseInt(id, 10);
+
   if (!incidentId) notFound();
 
   const data = await getIncidentWithWorkflows(incidentId);
+
   if (!data) notFound();
+
   const { incident, workflows, stepsByWf } = data;
   const back = `/incidents/${incident.id}`;
 
-  const needsRecovery = workflows.some((w) => w.status === "needs_recovery");
+  const needsRecovery = workflows.some(
+    (w) => w.status === "needs_recovery"
+  );
 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-2">
-        <Link href="/incidents" className="text-sm font-semibold text-blue-700 hover:underline">
-          ← Incidents
+        <Link
+          href="/incidents"
+          className="text-sm font-semibold text-blue-700 hover:underline"
+        >
+          ← Back to Emergencies
         </Link>
       </div>
 
+      {/* Emergency information */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-slate-900">{incident.title}</h1>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl font-bold text-slate-900">
+                {incident.title}
+              </h1>
+
               <StatusBadge status={incident.status} />
             </div>
+
             <p className="mt-1 text-sm text-slate-600">
-              {incident.reference} · {INCIDENT_TYPE_LABEL[incident.type] ?? incident.type} ·{" "}
+              {incident.reference} ·{" "}
+              {INCIDENT_TYPE_LABEL[incident.type] ?? incident.type} ·{" "}
               {incident.location}
               {incident.zone ? ` · ${incident.zone}` : ""}
             </p>
           </div>
+
           <div className="text-right text-sm text-slate-600">
             <div>
-              Severity <span className="font-bold text-slate-900">{incident.severity}</span> (
-              {SEVERITY_LABEL[incident.severity]})
-            </div>
-            <div>
-              Population at risk:{" "}
+              Priority:{" "}
               <span className="font-bold text-slate-900">
-                {incident.populationAtRisk?.toLocaleString() ?? "—"}
+                {SEVERITY_LABEL[incident.severity] ??
+                  `Level ${incident.severity}`}
               </span>
             </div>
-            <div className="text-xs text-slate-400">Declared {timeAgo(incident.createdAt)}</div>
+
+            <div>
+              Estimated people affected:{" "}
+              <span className="font-bold text-slate-900">
+                {incident.populationAtRisk?.toLocaleString() ?? "Not provided"}
+              </span>
+            </div>
+
+            <div className="text-xs text-slate-400">
+              Reported {timeAgo(incident.createdAt)}
+            </div>
           </div>
         </div>
       </section>
 
+      {/* Recovery message */}
       {needsRecovery && (
         <div className="rounded-xl border border-orange-300 bg-orange-50 p-4 text-sm text-orange-900">
-          <p className="font-semibold">⚠ Procedure paused for recovery</p>
+          <p className="font-semibold">
+            ⚠ Response paused — an action needs attention
+          </p>
+
           <p className="mt-1 text-orange-800">
-            A tool action failed. Completed steps are preserved — use <strong>Retry</strong> to re-run
-            only the failed step, or <strong>Skip</strong> it with a reason. If a tool is unavailable,
-            restore it from the{" "}
-            <Link href="/tools" className="font-semibold underline">
-              Tools
+            One of the actions could not be completed. Previously
+            completed actions have been saved. You can try the failed
+            action again or continue without it by providing a reason.
+
+            If a connected service is unavailable, check the{" "}
+            <Link
+              href="/tools"
+              className="font-semibold underline"
+            >
+              Connected Services
             </Link>{" "}
-            panel first.
+            page.
           </p>
         </div>
       )}
 
-      {/* Workflows */}
+      {/* Response plans */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-800">Response procedures</h2>
-          {workflows.some((w) => w.status === "awaiting_approval") && (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold text-slate-800">
+            Response Plans
+          </h2>
+
+          {workflows.some(
+            (w) => w.status === "awaiting_approval"
+          ) && (
             <Link
               href="/approvals"
               className="rounded-full bg-violet-600 px-3 py-1 text-xs font-semibold text-white hover:bg-violet-700"
             >
-              Open approval queue →
+              View Pending Decisions →
             </Link>
           )}
         </div>
 
         {workflows.length === 0 && (
           <p className="rounded-lg border border-dashed border-slate-300 bg-white p-4 text-sm text-slate-500">
-            No procedure started yet. Launch a playbook below to coordinate the response.
+            No response plan has been started yet. Choose a plan
+            below to organize the emergency response.
           </p>
         )}
 
         {workflows.map((wf) => {
           const steps = stepsByWf[wf.id] ?? [];
-          const activeStep = steps.find((s) => s.status === "pending" || s.status === "waiting");
-          const dur = minutesBetween(wf.startedAt, wf.finishedAt);
+
+          const activeStep = steps.find(
+            (s) =>
+              s.status === "pending" ||
+              s.status === "waiting"
+          );
+
+          const dur = minutesBetween(
+            wf.startedAt,
+            wf.finishedAt
+          );
+
+          const completedSteps = steps.filter(
+            (s) => s.status === "succeeded"
+          ).length;
+
           return (
-            <div key={wf.id} className="rounded-2xl border border-slate-200 bg-white p-4">
+            <div
+              key={wf.id}
+              className="rounded-2xl border border-slate-200 bg-white p-4"
+            >
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="font-semibold text-slate-800">{wf.name}</h3>
+                <h3 className="font-semibold text-slate-800">
+                  {wf.name}
+                </h3>
+
                 <StatusBadge status={wf.status} />
+
                 <span className="text-xs text-slate-400">
-                  {steps.filter((s) => s.status === "succeeded").length}/{steps.length} steps done
+                  {completedSteps} of {steps.length} actions completed
                   {dur != null ? ` · ${fmtMinutes(dur)}` : ""}
                 </span>
               </div>
+
               <ol className="mt-3 space-y-2">
                 {steps.map((s) => (
                   <StepRow
@@ -135,29 +192,50 @@ export default async function IncidentPage({
         })}
       </section>
 
-      {/* Launch another playbook */}
+      {/* Start another response plan */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="text-lg font-semibold text-slate-800">Launch another playbook</h2>
+        <h2 className="text-lg font-semibold text-slate-800">
+          Start Another Response Plan
+        </h2>
+
         <p className="mb-3 text-sm text-slate-600">
-          Start an additional coordinated procedure for this incident.
+          Choose another plan if additional help or actions are
+          needed for this emergency.
         </p>
-        <form action="/api/workflows" method="post" className="flex flex-wrap items-end gap-3">
-          <input type="hidden" name="incidentId" value={incident.id} />
+
+        <form
+          action="/api/workflows"
+          method="post"
+          className="flex flex-wrap items-end gap-3"
+        >
+          <input
+            type="hidden"
+            name="incidentId"
+            value={incident.id}
+          />
+
           <label className="flex-1">
-            <span className="mb-1 block text-sm font-semibold text-slate-700">Playbook</span>
-            <select name="playbook" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <span className="mb-1 block text-sm font-semibold text-slate-700">
+              Select a Response Plan
+            </span>
+
+            <select
+              name="playbook"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            >
               {PLAYBOOKS.map((p) => (
                 <option key={p.slug} value={p.slug}>
-                  {p.name} ({p.steps.length} steps)
+                  {p.name} ({p.steps.length} actions)
                 </option>
               ))}
             </select>
           </label>
+
           <button
             type="submit"
             className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
           >
-            Start procedure
+            Start Response Plan
           </button>
         </form>
       </section>
