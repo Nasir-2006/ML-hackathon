@@ -12,8 +12,8 @@ The workspace has not been connected to GitHub and no demo video has been record
 
 Replace these placeholders only after publishing:
 
-- **GitHub repository URL:** `https://github.com/<owner>/<repository>`
-- **Live / Vercel URL:** `https://<your-deployment-domain>`
+- **GitHub repository URL:** `https://github.com/Nasir-2006/ML-hackathon`
+- **Live / Vercel URL:** `https://ml-hackathon-eta.vercel.app/`
 - **Demo video URL:** `https://<public-video-link>`
 
 For a temporary hosted preview, use the URL returned by the platform's latest successful preview build. A sandbox preview is not a substitute for a durable deployment if its lifetime is limited.
