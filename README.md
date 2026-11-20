@@ -269,7 +269,9 @@ It also helped me understand how different parts of a full-stack application wor
 
 ## 👨‍💻 Author
 
-**Nasir**
+**Nasir(FA24-BCS-081) 
+  Ahmad Akhtar(FA25-BCS-011)
+  Huzaifa Bhatti(FA25-BCS-12)**
 
 Computer Science Student | Full-Stack & AI/ML Enthusiast
 
