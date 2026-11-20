@@ -1,20 +1,21 @@
+
 @import "tailwindcss";
 
-/* Low-bandwidth "lite" mode: hide non-essential panels and drop shadows
-   so the console stays usable on slow devices and metered connections. */
+/* Low-bandwidth Lite mode */
 body.lite .lite-hide {
   display: none !important;
 }
+
+/* Remove shadows without affecting background colors or gradients */
 body.lite * {
   box-shadow: none !important;
-  background-image: none !important;
 }
 
 html {
   scroll-behavior: smooth;
 }
 
-/* Keep the page usable when the fixed connectivity bar is present. */
+/* Keep the page usable when the fixed connectivity bar is present */
 @media (max-width: 640px) {
   main {
     padding-bottom: 5rem;

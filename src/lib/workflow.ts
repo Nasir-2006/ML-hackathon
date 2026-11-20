@@ -382,30 +382,53 @@ export async function retryStep(stepId: number, actor: string) {
   await processWorkflow(step.workflowId, actor);
 }
 
-/** Recovery path: skip a step with a recorded reason. */
-export async function skipStep(stepId: number, actor: string, reason: string) {
+
+/** Recovery path: skip a failed step with a recorded reason. */
+export async function skipStep(
+  stepId: number,
+  actor: string,
+  reason: string
+) {
   const step = await db.query.workflowSteps.findFirst({
     where: eq(workflowSteps.id, stepId),
   });
-  if (!step) throw new Error("step not found");
+
+  if (!step) {
+    throw new Error("Step not found");
+  }
+
+  if (step.status !== "failed") {
+    throw new Error("Only failed steps can be skipped");
+  }
+
+  if (!reason.trim()) {
+    throw new Error("A skip reason is required");
+  }
 
   await db
     .update(workflowSteps)
     .set({
       status: "skipped",
-      approvalStatus: step.requiresApproval ? "rejected" : step.approvalStatus,
-      approvalNote: reason,
+      approvalNote: reason.trim(),
       approvedBy: actor,
       approvedAt: new Date(),
     })
     .where(eq(workflowSteps.id, stepId));
 
-  await audit("step_skipped", { stepId, workflowId: step.workflowId, actor, detail: { reason } });
+  await audit("step_skipped", {
+    stepId,
+    workflowId: step.workflowId,
+    actor,
+    detail: { reason: reason.trim() },
+  });
 
-  await db.update(workflows).set({ status: "running" }).where(eq(workflows.id, step.workflowId));
+  await db
+    .update(workflows)
+    .set({ status: "running", finishedAt: null })
+    .where(eq(workflows.id, step.workflowId));
+
   await processWorkflow(step.workflowId, actor);
 }
-
 export async function setToolAvailability(
   tool: string,
   available: boolean,
@@ -436,9 +459,14 @@ export async function getMetrics() {
   let approvedSteps = 0;
   let failedSteps = 0;
   for (const w of all) {
-    if (w.startedAt && w.finishedAt) {
-      totalMinutes += (w.finishedAt.getTime() - w.startedAt.getTime()) / 60000;
-    }
+    if (
+  w.status === "completed" &&
+  w.startedAt &&
+  w.finishedAt
+) {
+  totalMinutes +=
+    (w.finishedAt.getTime() - w.startedAt.getTime()) / 60000;
+}
     const steps = await getSteps(w.id);
     for (const s of steps) {
       if (s.status === "succeeded" && !s.requiresApproval) autoSteps++;
