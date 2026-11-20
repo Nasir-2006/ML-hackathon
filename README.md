@@ -20,7 +20,7 @@ Instead of treating an emergency response as a collection of disconnected tasks,
 |---|---|
 | 🚀 Live Demo | [Open Sentinel](https://ml-hackathon-eta.vercel.app/) |
 | 💻 GitHub Repository | [View Source Code](https://github.com/Nasir-2006/ML-hackathon) |
-| 🎥 Demo Video | *Coming Soon — Link will be added here* |
+| 🎥 Demo Video | https://drive.google.com/file/d/17oyTjQRjmhGbW3vF68f-wxME6KEzD11o/view?usp=sharing |
 
 ---
 
