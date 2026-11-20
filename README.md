@@ -1,116 +1,281 @@
-# Sentinel — Municipal Emergency Coordination
+# 🚨 Sentinel — Municipal Emergency Coordination
 
-Sentinel is a demonstration prototype for coordinating a municipal emergency response across disconnected tools. It turns an incident playbook into a resumable workflow with approval gates for consequential actions, a recovery path for partial failures, and an evidence record for every consequential output.
+**Turning emergency response playbooks into coordinated, resumable workflows.**
 
-> **Simulation only — not an emergency dispatch system.** Tool integrations are mocked and do not contact residents, responders, utility providers, or public warning systems. The app has no user authentication or production authorization controls. Do not use it to direct real emergency operations. Real deployment requires approved integrations, authentication/authorization, security review, operational testing, and municipal sign-off.
+Sentinel is a full-stack demonstration project I built to explore how technology can improve coordination during municipal emergencies.
 
-## Guided demo
+It brings different emergency response activities into one workflow, with human approval gates, recovery mechanisms, and an evidence trail for important actions.
 
-Open `/demo` for a short walkthrough. It links to the sample recovery incident, tool status simulator, human approval queue, evidence ledger, and impact report.
+Instead of treating an emergency response as a collection of disconnected tasks, Sentinel organizes it into a structured process that can be monitored, resumed, and reviewed.
 
-The demo database is seeded with:
+> ⚠️ **Simulation Only — Not a Real Emergency Dispatch System**
+>
+> Sentinel is a demonstration prototype. All tool integrations are simulated and do not contact real residents, emergency responders, utility providers, or public warning systems. It is not intended for real emergency operations.
 
-- Two completed sample playbooks and simulated tool receipts.
-- One active procedure paused on a simulated mass-SMS outage.
-- Evidence records for the seeded consequential outputs.
-- An illustrative reference baseline for comparing the demo workflow.
+---
 
-### Important: interpret the metrics honestly
+## 🌐 Project Links
 
-The seeded baseline (14 steps, 6 systems, 47 minutes, 3.4 reported errors per incident) is an **illustrative fixture**, not a verified municipal operations study. The completed sample workflow durations are also **simulated fixture values**, not measured field outcomes. They demonstrate how Sentinel can calculate a comparison; they do not establish real-world improvement. Replace the fixture with an approved, documented time study and validated error data before making operational or public impact claims.
+| Resource | Link |
+|---|---|
+| 🚀 Live Demo | [Open Sentinel](https://ml-hackathon-eta.vercel.app/) |
+| 💻 GitHub Repository | [View Source Code](https://github.com/Nasir-2006/ML-hackathon) |
+| 🎥 Demo Video | *Coming Soon — Link will be added here* |
 
-## Features
+---
 
-- **Coordinated playbooks:** flood, fire, and severe-weather response sequences.
-- **Human approval:** evacuation orders, mass SMS, utility notifications, and social posts pause before simulated execution.
-- **Partial-failure recovery:** completed steps are preserved; retry only the failed step or skip it with a recorded reason. Consequential retries that have not already been approved return to human review.
-- **Evidence ledger:** captures the action, actor, approver, input parameters, incident context, and simulated tool receipt.
-- **Low-bandwidth support:** server-rendered pages, HTML form fallbacks, low-bandwidth mode, an app-shell service worker, and a browser-side offline action queue.
-- **Impact report:** compares a documented reference fixture with workflow durations recorded in the app; the seeded figures are marked illustrative.
+## ✨ What I Built
 
-## Stack
+I designed Sentinel around a simple idea: **an emergency response workflow should not lose its progress just because one step fails.**
 
-- Next.js App Router and React
-- PostgreSQL with Drizzle ORM
-- Tailwind CSS
-- Simulated integrations in `src/lib/tools.ts`
+The application demonstrates how multiple response activities can be coordinated while keeping consequential decisions under human control.
 
-## Local development
+### 🚒 1. Coordinated Emergency Playbooks
 
-Requirements: Node.js 20+ and PostgreSQL.
+- Structured response workflows for floods, fires, and severe weather.
+- Organizes emergency procedures into individual steps.
+- Tracks workflow progress and completed actions.
+- Allows an incident procedure to resume after interruption.
 
-1. Install dependencies:
+### 🛡️ 2. Human Approval System
 
-   ```bash
-   npm install
-   ```
+Certain actions require human approval before simulated execution, including:
 
-2. Create a local environment file and set `DATABASE_URL` to a PostgreSQL database you control:
+- Evacuation orders.
+- Mass SMS notifications.
+- Utility notifications.
+- Social media announcements.
 
-   ```bash
-   cp .env.example .env
-   ```
+This creates an approval checkpoint before consequential actions proceed.
 
-3. Apply the Drizzle schema and (on an empty demo database) load sample data:
+### 🔄 3. Failure Recovery
 
-   ```bash
-   npx drizzle-kit push
-   node --env-file=.env scripts/seed.mjs
-   ```
+What happens when one step fails?
 
-   The seed script intentionally skips the database if it already contains incidents. Use a new, disposable database to recreate the initial demo fixture.
+Sentinel demonstrates a recovery mechanism:
 
-4. Start the development server:
+- Preserves successfully completed steps.
+- Allows retrying only the failed step.
+- Supports skipping a failed step with a recorded reason.
+- Sends consequential retries that lack approval back for human review.
 
-   ```bash
-   npm run dev
-   ```
+### 📋 4. Evidence Ledger
 
-   Open `http://localhost:3000/demo`.
+Important actions are recorded in an evidence ledger.
 
-## Deploy a public demo
+Records include:
 
-### PostgreSQL
+- Action performed.
+- Actor and approver.
+- Input parameters.
+- Incident context.
+- Simulated tool receipt.
 
-Create a disposable PostgreSQL database with a provider such as Neon, Supabase, or another managed Postgres service. Keep credentials private. Do not commit `.env`; `.gitignore` excludes it.
+This makes it possible to review what happened during a workflow.
 
-Set the production `DATABASE_URL` in your hosting provider's environment variables. Before opening the public site, apply the schema against that database and, if desired, seed it with sample data:
+### 📶 5. Low-Bandwidth Support
+
+I also included features intended to demonstrate resilience in environments with limited connectivity:
+
+- Server-rendered pages.
+- HTML form fallbacks.
+- Low-bandwidth mode.
+- App-shell service worker.
+- Browser-side offline action queue.
+
+### 📊 6. Impact Report
+
+The application includes an impact report that compares a reference baseline with recorded workflow durations.
+
+**Important:** The current baseline and sample workflow results are illustrative simulated data, not verified municipal operational measurements. They demonstrate the reporting mechanism rather than proving real-world improvements.
+
+---
+
+## 🧰 Technology Stack
+
+| Technology | Purpose |
+|---|---|
+| Next.js | Full-stack application and routing |
+| React | User interface |
+| TypeScript | Application logic and type safety |
+| PostgreSQL | Database |
+| Drizzle ORM | Database schema and queries |
+| Tailwind CSS | Styling and responsive UI |
+| Neon | Managed PostgreSQL hosting |
+| Vercel | Application deployment |
+| Git & GitHub | Version control and source hosting |
+
+---
+
+## 🏗️ How It Works
+
+The main workflow follows this general sequence:
+
+1. An incident is selected.
+2. The corresponding emergency playbook is loaded.
+3. Individual response steps are executed through simulated integrations.
+4. Consequential actions pause for human approval.
+5. Successful actions are preserved in the workflow.
+6. Failed actions can be retried or skipped with a recorded reason.
+7. Important actions are captured in the evidence ledger.
+8. Workflow information is presented through the impact report.
+
+---
+
+## 🖥️ Guided Demo
+
+The application includes a guided walkthrough at:
+
+👉 [Open Sentinel Demo](https://ml-hackathon-eta.vercel.app/demo)
+
+The demo includes:
+
+- Sample emergency playbooks.
+- Simulated tool status.
+- Human approval queue.
+- Evidence ledger.
+- Impact report.
+- A sample incident demonstrating recovery after a simulated mass-SMS outage.
+
+---
+
+## ⚙️ Local Setup
+
+Want to run Sentinel locally?
+
+### Requirements
+
+- Node.js 20+
+- PostgreSQL
+- npm
+
+### 1. Clone the repository
 
 ```bash
-DATABASE_URL='postgresql://…' npx drizzle-kit push
-DATABASE_URL='postgresql://…' node scripts/seed.mjs
+git clone https://github.com/Nasir-2006/ML-hackathon.git
+cd ML-hackathon
 ```
 
-The production build needs the same `DATABASE_URL` configured in the hosting project. The public demo is unauthenticated and all tool actions are simulated; use only disposable demo data.
-
-### Vercel
-
-1. Push the project to a public GitHub repository (instructions below).
-2. Import that repository in Vercel.
-3. Configure `DATABASE_URL` in Vercel's project environment settings.
-4. Deploy and open `/demo` to verify the public walkthrough.
-
-The app's `drizzle.config.ts` reads `DATABASE_URL`, so schema changes can target the selected PostgreSQL database without editing a hardcoded connection string.
-
-## Publish to GitHub
-
-This workspace has no Git remote configured, so it does not yet have a public repository URL. After creating a repository on GitHub, run these commands from the project root (replace the URL with your repository URL):
+### 2. Install dependencies
 
 ```bash
-git init
-git add .
-git commit -m "Build Sentinel emergency coordination demo"
-git branch -M main
-git remote add origin https://github.com/<owner>/<repository>.git
-git push -u origin main
+npm install
 ```
 
-Confirm `.env` and other secrets are not staged before pushing. The `.env.example` file is safe to publish because it contains a local placeholder only.
+### 3. Configure environment variables
 
-## Demo recording
+Create a local `.env` file:
 
-See [`docs/DEMO_VIDEO_SCRIPT.md`](docs/DEMO_VIDEO_SCRIPT.md) for a concise screen-recording script. The recording still needs to be captured and uploaded to a public service (YouTube, Loom, or a publicly viewable Drive link); this repository cannot create that external video URL on its own.
+```bash
+cp .env.example .env
+```
 
-## Project submission links
+Add your own PostgreSQL connection string:
 
-Use [`docs/SUBMISSION_LINKS.md`](docs/SUBMISSION_LINKS.md) as the checklist for the project-link form. The repository URL and public demo-video URL must be filled in after those external publishing steps are complete. A live preview link is available from the project preview environment while it remains active; for a durable judging URL, deploy the project to Vercel or another public host.
+```env
+DATABASE_URL=your_postgresql_connection_string
+```
+
+**Keep your `.env` file private. Never commit database credentials to GitHub.**
+
+### 4. Apply the database schema
+
+```bash
+npx drizzle-kit push
+```
+
+### 5. Seed the demo database
+
+For a fresh, empty demo database:
+
+```bash
+node --env-file=.env scripts/seed.mjs
+```
+
+The seed script skips databases that already contain incidents. Use a new, disposable database if you want to recreate the initial demo data.
+
+### 6. Start the development server
+
+```bash
+npm run dev
+```
+
+Open:
+
+http://localhost:3000/demo
+
+---
+
+## ☁️ Deployment
+
+I deployed Sentinel using **Vercel** with **Neon PostgreSQL**.
+
+The deployment process involved:
+
+1. Publishing the source code to GitHub.
+2. Connecting the GitHub repository to Vercel.
+3. Creating a PostgreSQL database on Neon.
+4. Configuring `DATABASE_URL` in Vercel environment variables.
+5. Applying the Drizzle database schema to Neon.
+6. Deploying the application and verifying the live demo.
+
+The application uses environment-based database configuration, so database credentials do not need to be hardcoded into the source code.
+
+---
+
+## ⚠️ Limitations & Future Improvements
+
+Sentinel is currently a demonstration prototype, not a production-ready emergency management platform.
+
+Some areas that would need further development include:
+
+- User authentication and role-based authorization.
+- Real, approved emergency-service integrations.
+- Stronger security and access controls.
+- Production-grade offline synchronization.
+- Operational testing and reliability evaluation.
+- Validated municipal response data.
+- Official municipal approval and deployment.
+
+The current integrations are mocked, and the application does not provide production authorization controls.
+
+---
+
+## 🎯 What This Project Helped Me Explore
+
+Building Sentinel gave me practical experience with:
+
+- Full-stack application development.
+- Working with Next.js and React.
+- PostgreSQL database integration.
+- Database schema management using Drizzle ORM.
+- Environment variables and secret management.
+- Git and GitHub workflows.
+- Deploying a full-stack application using Vercel.
+- Debugging database and deployment issues.
+- Designing workflows with approval and recovery mechanisms.
+
+It also helped me understand how different parts of a full-stack application work together, from the frontend and backend to the database and cloud deployment.
+
+---
+
+## 🎥 Demo Video
+
+**Project walkthrough:** Coming soon.
+
+*I will add the public demo recording link here once it is recorded and uploaded.*
+
+---
+
+## 👨‍💻 Author
+
+**Nasir**
+
+Computer Science Student | Full-Stack & AI/ML Enthusiast
+
+- GitHub: [Nasir-2006](https://github.com/Nasir-2006)
+- Project: [Sentinel — Municipal Emergency Coordination](https://github.com/Nasir-2006/ML-hackathon)
+
+---
+
+*Built as a demonstration project to explore resilient workflows, human oversight, and emergency coordination through software.*
